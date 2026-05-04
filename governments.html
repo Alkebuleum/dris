@@ -1,0 +1,1658 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>DRIS for Governments — Digital Public Records Infrastructure</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,400;0,9..144,500;0,9..144,600;1,9..144,400;1,9..144,500&family=Inter:wght@300;400;500;600;700&family=IBM+Plex+Mono:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --paper:     #F5F2EC;
+  --paper-2:   #ECE8DF;
+  --paper-3:   #E4DFD2;
+  --ink:       #0B1538;
+  --ink-2:     #1A2446;
+  --ink-soft:  #4A5270;
+  --ink-muted: #7C8299;
+
+  --navy:      #0A1F4E;
+  --navy-deep: #071535;
+
+  --teal:      #1DC9A4;
+  --teal-ink:  #0B7A60;
+
+  --rule:      rgba(11,21,56,0.12);
+  --rule-2:    rgba(11,21,56,0.06);
+}
+
+html { scroll-behavior: smooth; }
+
+body {
+  font-family: 'Inter', -apple-system, sans-serif;
+  background: var(--paper);
+  color: var(--ink);
+  overflow-x: hidden;
+  -webkit-font-smoothing: antialiased;
+  font-feature-settings: "ss01", "cv11";
+}
+
+body::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 1;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 400 400' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.035'/%3E%3C/svg%3E");
+  opacity: 0.6;
+  mix-blend-mode: multiply;
+}
+
+/* ─────────── HEADER ─────────── */
+header {
+  position: fixed;
+  top: 0; left: 0; right: 0;
+  z-index: 100;
+  padding: 28px 48px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  transition: background 0.3s, border-color 0.3s, padding 0.3s;
+  border-bottom: 1px solid transparent;
+}
+
+header.scrolled {
+  background: rgba(245,242,236,0.88);
+  backdrop-filter: blur(14px);
+  border-color: var(--rule-2);
+  padding: 18px 48px;
+}
+
+.brand {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  text-decoration: none;
+  color: var(--ink);
+}
+
+.brand-mark { width: 30px; height: 30px; }
+.brand-mark svg { width: 30px; height: 30px; }
+
+.brand-name {
+  font-family: 'Fraunces', serif;
+  font-weight: 700;
+  font-size: 19px;
+  letter-spacing: -0.03em;
+  color: var(--ink);
+  font-variation-settings: "opsz" 72;
+}
+
+.brand-sub {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 10px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--ink-muted);
+  margin-left: 6px;
+  border-left: 1px solid var(--rule);
+  padding-left: 12px;
+}
+
+.header-nav {
+  display: flex;
+  align-items: center;
+  gap: 32px;
+}
+
+.header-nav a {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 11px;
+  font-weight: 400;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--ink-soft);
+  text-decoration: none;
+  transition: color 0.2s;
+}
+
+.header-nav a:hover, .header-nav a.active { color: var(--ink); }
+
+.header-cta {
+  padding: 10px 20px;
+  background: var(--ink);
+  color: var(--paper);
+  font-family: 'Inter', sans-serif;
+  font-size: 13px;
+  font-weight: 500;
+  letter-spacing: -0.01em;
+  border: none;
+  cursor: pointer;
+  transition: all 0.2s;
+  text-decoration: none;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.header-cta:hover { background: var(--navy); }
+
+.menu-toggle { display: none; flex-direction: column; gap: 5px; background: none; border: none; cursor: pointer; padding: 4px; }
+.menu-toggle span { display: block; width: 22px; height: 1.5px; background: var(--ink); transition: all 0.3s; }
+.menu-toggle.open span:nth-child(1) { transform: rotate(45deg) translate(5px,5px); }
+.menu-toggle.open span:nth-child(2) { opacity: 0; }
+.menu-toggle.open span:nth-child(3) { transform: rotate(-45deg) translate(5px,-5px); }
+
+.mobile-drawer {
+  display: none;
+  position: fixed;
+  top: 80px; left: 0; right: 0;
+  background: var(--paper);
+  border-bottom: 1px solid var(--rule);
+  z-index: 99;
+  padding: 24px 40px 32px;
+  flex-direction: column;
+  gap: 4px;
+  opacity: 0;
+  transform: translateY(-8px);
+  transition: all 0.25s cubic-bezier(0.22,1,0.36,1);
+}
+
+.mobile-drawer.open { opacity: 1; transform: translateY(0); }
+
+.mobile-drawer a {
+  font-family: 'Fraunces', serif;
+  font-size: 20px;
+  font-weight: 500;
+  letter-spacing: -0.02em;
+  color: var(--ink);
+  text-decoration: none;
+  padding: 12px 0;
+  border-bottom: 1px solid var(--rule-2);
+  display: block;
+}
+
+/* ─────────── HERO ─────────── */
+.hero {
+  position: relative;
+  padding: 180px 48px 120px;
+}
+
+.hero-grid {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background-image: linear-gradient(to right, var(--rule-2) 1px, transparent 1px);
+  background-size: 25% 100%;
+  opacity: 0.5;
+}
+
+.hero-inner {
+  position: relative;
+  z-index: 2;
+  max-width: 1400px;
+  margin: 0 auto;
+}
+
+.hero-eyebrow {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  margin-bottom: 64px;
+  opacity: 0;
+  animation: rise 1s 0.2s cubic-bezier(0.22,1,0.36,1) forwards;
+}
+
+.eb-line {
+  flex: 0 0 48px;
+  height: 1px;
+  background: var(--ink);
+}
+
+.eb-text {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 11px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--ink-soft);
+}
+
+.eb-text strong {
+  color: var(--teal-ink);
+  font-weight: 500;
+}
+
+.hero-headline {
+  font-family: 'Fraunces', serif;
+  font-weight: 400;
+  font-size: clamp(48px, 7vw, 110px);
+  line-height: 0.96;
+  letter-spacing: -0.04em;
+  color: var(--ink);
+  max-width: 17ch;
+  margin-bottom: 56px;
+  font-variation-settings: "opsz" 144;
+  opacity: 0;
+  animation: rise 1s 0.4s cubic-bezier(0.22,1,0.36,1) forwards;
+}
+
+.hero-headline em {
+  font-style: italic;
+  color: var(--teal-ink);
+  font-variation-settings: "opsz" 144, "SOFT" 50, "WONK" 1;
+}
+
+.hero-foot {
+  display: grid;
+  grid-template-columns: 1.4fr 1fr;
+  gap: 64px;
+  align-items: end;
+  opacity: 0;
+  animation: rise 1s 0.7s cubic-bezier(0.22,1,0.36,1) forwards;
+}
+
+.hero-lead {
+  max-width: 560px;
+  font-size: 18px;
+  line-height: 1.6;
+  color: var(--ink-soft);
+  letter-spacing: -0.005em;
+}
+
+.hero-lead strong { color: var(--ink); font-weight: 600; }
+
+.hero-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  align-items: flex-start;
+}
+
+.hero-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  padding: 14px 24px;
+  background: var(--ink);
+  color: var(--paper);
+  text-decoration: none;
+  font-size: 14px;
+  font-weight: 500;
+  letter-spacing: -0.005em;
+  transition: all 0.2s;
+}
+
+.hero-btn:hover { background: var(--navy); }
+
+.hero-btn.ghost {
+  background: transparent;
+  color: var(--ink);
+  border: 1px solid var(--ink);
+}
+
+.hero-btn.ghost:hover {
+  background: var(--ink);
+  color: var(--paper);
+}
+
+.corner-mark {
+  position: absolute;
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 10px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--ink-muted);
+  z-index: 3;
+}
+
+.corner-mark.tr { top: 100px; right: 48px; }
+
+/* ─────────── PROBLEM SECTION ─────────── */
+.problem {
+  padding: 140px 48px;
+  background: var(--navy-deep);
+  color: var(--paper);
+  position: relative;
+  overflow: hidden;
+  border-top: 1px solid var(--rule);
+}
+
+.problem::before {
+  content: '';
+  position: absolute;
+  top: -100px; right: -50px;
+  width: 600px; height: 600px;
+  background: radial-gradient(ellipse, rgba(29,201,164,0.08), transparent 60%);
+  pointer-events: none;
+}
+
+.problem-inner {
+  max-width: 1400px;
+  margin: 0 auto;
+  position: relative;
+  z-index: 2;
+}
+
+.problem-meta {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 11px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: rgba(245,242,236,0.5);
+  padding-bottom: 14px;
+  border-bottom: 1px solid rgba(245,242,236,0.15);
+  margin-bottom: 56px;
+  display: flex;
+  justify-content: space-between;
+}
+
+.problem-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 96px;
+  align-items: start;
+}
+
+.problem-text h2 {
+  font-family: 'Fraunces', serif;
+  font-weight: 300;
+  font-size: clamp(36px, 4.2vw, 56px);
+  line-height: 1.05;
+  letter-spacing: -0.03em;
+  color: var(--paper);
+  margin-bottom: 32px;
+  font-variation-settings: "opsz" 144;
+}
+
+.problem-text h2 em {
+  font-style: italic;
+  color: var(--teal);
+  font-variation-settings: "opsz" 144, "SOFT" 50, "WONK" 1;
+}
+
+.problem-text p {
+  font-size: 16px;
+  line-height: 1.65;
+  color: rgba(245,242,236,0.7);
+  margin-bottom: 20px;
+  letter-spacing: -0.005em;
+}
+
+.problem-text p strong { color: var(--paper); font-weight: 600; }
+
+.problem-stats {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+}
+
+.pstat {
+  padding: 32px 0;
+  border-bottom: 1px solid rgba(245,242,236,0.12);
+}
+
+.pstat:first-child { padding-top: 0; }
+.pstat:last-child { border-bottom: none; }
+
+.pstat-val {
+  font-family: 'Fraunces', serif;
+  font-weight: 500;
+  font-size: 56px;
+  letter-spacing: -0.04em;
+  color: var(--paper);
+  line-height: 1;
+  margin-bottom: 12px;
+  font-variation-settings: "opsz" 144;
+}
+
+.pstat-val em {
+  font-style: italic;
+  font-weight: 400;
+  font-size: 36px;
+  color: var(--teal);
+  font-variation-settings: "opsz" 144, "SOFT" 50, "WONK" 1;
+  margin-left: 4px;
+}
+
+.pstat-desc {
+  font-size: 14px;
+  line-height: 1.55;
+  color: rgba(245,242,236,0.55);
+  letter-spacing: -0.005em;
+}
+
+.pstat-source {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 10px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: rgba(245,242,236,0.3);
+  display: block;
+  margin-top: 4px;
+}
+
+/* ─────────── SOLUTION ─────────── */
+.solution {
+  padding: 140px 48px;
+}
+
+.solution-inner {
+  max-width: 1400px;
+  margin: 0 auto;
+}
+
+.solution-meta {
+  display: grid;
+  grid-template-columns: 280px 1fr;
+  gap: 120px;
+  margin-bottom: 80px;
+  align-items: end;
+}
+
+.solution-label {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 11px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--ink-muted);
+  padding-top: 12px;
+  border-top: 1px solid var(--ink);
+}
+
+.solution-headline {
+  font-family: 'Fraunces', serif;
+  font-weight: 400;
+  font-size: clamp(36px, 4.2vw, 56px);
+  line-height: 1.05;
+  letter-spacing: -0.03em;
+  color: var(--ink);
+  font-variation-settings: "opsz" 144;
+  max-width: 18ch;
+}
+
+.solution-headline em {
+  font-style: italic;
+  color: var(--teal-ink);
+  font-variation-settings: "opsz" 144, "SOFT" 50, "WONK" 1;
+}
+
+.use-cases {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 1px;
+  background: var(--rule);
+  border: 1px solid var(--rule);
+}
+
+.uc {
+  background: var(--paper);
+  padding: 40px 36px;
+  transition: background 0.25s;
+}
+
+.uc:hover { background: var(--paper-2); }
+
+.uc-num {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 10px;
+  letter-spacing: 0.14em;
+  color: var(--teal-ink);
+  margin-bottom: 18px;
+}
+
+.uc-title {
+  font-family: 'Fraunces', serif;
+  font-weight: 500;
+  font-size: 26px;
+  letter-spacing: -0.025em;
+  color: var(--ink);
+  margin-bottom: 14px;
+  line-height: 1.15;
+  font-variation-settings: "opsz" 72;
+}
+
+.uc-title em {
+  font-style: italic;
+  color: var(--teal-ink);
+  font-variation-settings: "opsz" 72, "SOFT" 50, "WONK" 1;
+}
+
+.uc-desc {
+  font-size: 14.5px;
+  line-height: 1.65;
+  color: var(--ink-soft);
+  margin-bottom: 18px;
+  letter-spacing: -0.005em;
+}
+
+.uc-tags {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+
+.uc-tag {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 10px;
+  letter-spacing: 0.06em;
+  color: var(--ink-soft);
+  background: var(--paper-2);
+  border: 1px solid var(--rule);
+  padding: 3px 9px;
+  border-radius: 3px;
+}
+
+/* ─────────── AFCFTA SECTION ─────────── */
+.afcfta {
+  padding: 140px 48px;
+  background: var(--paper-2);
+  border-top: 1px solid var(--rule);
+  border-bottom: 1px solid var(--rule);
+}
+
+.afcfta-inner {
+  max-width: 1400px;
+  margin: 0 auto;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 96px;
+  align-items: center;
+}
+
+.afcfta-text .eyebrow {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 11px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--teal-ink);
+  margin-bottom: 18px;
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.afcfta-text .eyebrow::before {
+  content: '';
+  width: 20px;
+  height: 1.5px;
+  background: var(--teal-ink);
+}
+
+.afcfta-text h2 {
+  font-family: 'Fraunces', serif;
+  font-weight: 400;
+  font-size: clamp(34px, 4vw, 52px);
+  line-height: 1.05;
+  letter-spacing: -0.03em;
+  color: var(--ink);
+  margin-bottom: 28px;
+  font-variation-settings: "opsz" 144;
+}
+
+.afcfta-text h2 em {
+  font-style: italic;
+  color: var(--teal-ink);
+  font-variation-settings: "opsz" 144, "SOFT" 50, "WONK" 1;
+}
+
+.afcfta-text p {
+  font-size: 16px;
+  line-height: 1.65;
+  color: var(--ink-soft);
+  margin-bottom: 18px;
+  letter-spacing: -0.005em;
+}
+
+.afcfta-text p strong { color: var(--ink); font-weight: 600; }
+
+/* Map illustration */
+.map-illus {
+  position: relative;
+  aspect-ratio: 1 / 1.05;
+  background: var(--paper);
+  border: 1px solid var(--rule);
+  padding: 32px;
+  overflow: hidden;
+}
+
+.map-illus::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background:
+    radial-gradient(circle at 30% 40%, rgba(29,201,164,0.08), transparent 40%),
+    radial-gradient(circle at 70% 60%, rgba(29,201,164,0.05), transparent 40%);
+  pointer-events: none;
+}
+
+.map-svg {
+  width: 100%;
+  height: 100%;
+  position: relative;
+  z-index: 1;
+}
+
+.map-corner {
+  position: absolute;
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 9px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--ink-muted);
+  z-index: 2;
+}
+
+.map-corner.tl { top: 16px; left: 16px; }
+.map-corner.br { bottom: 16px; right: 16px; }
+
+@keyframes pulse-node {
+  0%, 100% { opacity: 1; r: 3.5; }
+  50% { opacity: 0.4; r: 2.5; }
+}
+
+.node-pulse {
+  animation: pulse-node 2.5s ease-in-out infinite;
+  transform-origin: center;
+}
+
+@keyframes flow-line {
+  0% { stroke-dashoffset: 200; opacity: 0; }
+  20% { opacity: 0.6; }
+  80% { opacity: 0.6; }
+  100% { stroke-dashoffset: 0; opacity: 0; }
+}
+
+.flow-path {
+  stroke-dasharray: 4 6;
+  animation: flow-line 4s linear infinite;
+}
+
+/* ─────────── ROLLOUT ─────────── */
+.rollout {
+  padding: 140px 48px;
+}
+
+.rollout-inner {
+  max-width: 1400px;
+  margin: 0 auto;
+}
+
+.rollout-head {
+  display: grid;
+  grid-template-columns: 280px 1fr;
+  gap: 120px;
+  align-items: end;
+  margin-bottom: 96px;
+}
+
+.rollout-label {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 11px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--ink-muted);
+  padding-top: 12px;
+  border-top: 1px solid var(--ink);
+}
+
+.rollout-headline {
+  font-family: 'Fraunces', serif;
+  font-weight: 400;
+  font-size: clamp(36px, 4.2vw, 56px);
+  line-height: 1.05;
+  letter-spacing: -0.03em;
+  color: var(--ink);
+  font-variation-settings: "opsz" 144;
+  max-width: 17ch;
+}
+
+.rollout-headline em {
+  font-style: italic;
+  color: var(--teal-ink);
+  font-variation-settings: "opsz" 144, "SOFT" 50, "WONK" 1;
+}
+
+.phases {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 0;
+  position: relative;
+}
+
+.phases::before {
+  content: '';
+  position: absolute;
+  top: 28px;
+  left: 28px;
+  right: 28px;
+  height: 1px;
+  background: linear-gradient(to right, var(--teal-ink) 0%, var(--rule) 100%);
+  opacity: 0.5;
+  z-index: 0;
+}
+
+.phase {
+  position: relative;
+  z-index: 1;
+  padding: 0 20px 0 0;
+}
+
+.phase-num {
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  background: var(--paper);
+  border: 1.5px solid var(--ink);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 32px;
+  font-family: 'Fraunces', serif;
+  font-style: italic;
+  font-weight: 400;
+  font-size: 22px;
+  color: var(--ink);
+  letter-spacing: -0.02em;
+  font-variation-settings: "opsz" 72, "SOFT" 50, "WONK" 1;
+}
+
+.phase.first .phase-num {
+  background: var(--teal-ink);
+  border-color: var(--teal-ink);
+  color: var(--paper);
+}
+
+.phase-meta {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 10px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--ink-muted);
+  margin-bottom: 12px;
+}
+
+.phase-title {
+  font-family: 'Fraunces', serif;
+  font-weight: 500;
+  font-size: 22px;
+  letter-spacing: -0.02em;
+  color: var(--ink);
+  line-height: 1.15;
+  margin-bottom: 14px;
+  font-variation-settings: "opsz" 72;
+}
+
+.phase-desc {
+  font-size: 14px;
+  line-height: 1.55;
+  color: var(--ink-soft);
+  letter-spacing: -0.005em;
+}
+
+.phase-time {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 10px;
+  letter-spacing: 0.08em;
+  color: var(--teal-ink);
+  margin-top: 14px;
+}
+
+/* ─────────── OUTCOMES ─────────── */
+.outcomes {
+  padding: 140px 48px;
+  background: var(--paper-2);
+  border-top: 1px solid var(--rule);
+}
+
+.outcomes-inner {
+  max-width: 1400px;
+  margin: 0 auto;
+}
+
+.outcomes-head {
+  margin-bottom: 80px;
+  max-width: 720px;
+}
+
+.outcomes-head .eyebrow {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 11px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--ink-muted);
+  margin-bottom: 18px;
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.outcomes-head .eyebrow::before {
+  content: '';
+  width: 20px;
+  height: 1.5px;
+  background: var(--ink);
+}
+
+.outcomes-head h2 {
+  font-family: 'Fraunces', serif;
+  font-weight: 400;
+  font-size: clamp(36px, 4.2vw, 56px);
+  line-height: 1.05;
+  letter-spacing: -0.03em;
+  color: var(--ink);
+  font-variation-settings: "opsz" 144;
+}
+
+.outcomes-head h2 em {
+  font-style: italic;
+  color: var(--teal-ink);
+  font-variation-settings: "opsz" 144, "SOFT" 50, "WONK" 1;
+}
+
+.outcomes-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 0;
+  border: 1px solid var(--rule);
+  background: var(--rule);
+}
+
+.outcome {
+  background: var(--paper);
+  padding: 36px 32px;
+}
+
+.outcome-icon {
+  width: 44px;
+  height: 44px;
+  background: var(--paper-2);
+  border: 1px solid var(--rule);
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 20px;
+}
+
+.outcome-icon svg { width: 20px; height: 20px; color: var(--ink); }
+
+.outcome-num {
+  font-family: 'Fraunces', serif;
+  font-weight: 500;
+  font-size: 32px;
+  letter-spacing: -0.04em;
+  color: var(--ink);
+  line-height: 1;
+  margin-bottom: 8px;
+  font-variation-settings: "opsz" 144;
+}
+
+.outcome-num em {
+  font-style: italic;
+  font-weight: 400;
+  font-size: 22px;
+  color: var(--teal-ink);
+  font-variation-settings: "opsz" 144, "SOFT" 50, "WONK" 1;
+}
+
+.outcome-title {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--ink);
+  margin-bottom: 6px;
+  letter-spacing: -0.005em;
+}
+
+.outcome-desc {
+  font-size: 13px;
+  line-height: 1.55;
+  color: var(--ink-soft);
+}
+
+/* ─────────── PARTNERSHIP CTA ─────────── */
+.partner {
+  padding: 160px 48px 140px;
+  position: relative;
+  text-align: center;
+}
+
+.partner-inner {
+  max-width: 800px;
+  margin: 0 auto;
+}
+
+.partner-eyebrow {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 11px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--ink-muted);
+  margin-bottom: 32px;
+  display: inline-flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.partner-eyebrow::before, .partner-eyebrow::after {
+  content: '';
+  width: 32px;
+  height: 1px;
+  background: var(--ink-muted);
+}
+
+.partner-h2 {
+  font-family: 'Fraunces', serif;
+  font-weight: 300;
+  font-size: clamp(40px, 5vw, 76px);
+  line-height: 1;
+  letter-spacing: -0.035em;
+  color: var(--ink);
+  margin-bottom: 32px;
+  font-variation-settings: "opsz" 144;
+}
+
+.partner-h2 em {
+  font-style: italic;
+  color: var(--teal-ink);
+  font-variation-settings: "opsz" 144, "SOFT" 50, "WONK" 1;
+}
+
+.partner-p {
+  font-size: 17px;
+  line-height: 1.6;
+  color: var(--ink-soft);
+  margin-bottom: 48px;
+  max-width: 560px;
+  margin-left: auto;
+  margin-right: auto;
+  letter-spacing: -0.005em;
+}
+
+.partner-actions {
+  display: flex;
+  gap: 12px;
+  justify-content: center;
+  margin-bottom: 32px;
+  flex-wrap: wrap;
+}
+
+.partner-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  padding: 14px 28px;
+  font-family: 'Inter', sans-serif;
+  font-size: 14px;
+  font-weight: 500;
+  letter-spacing: -0.005em;
+  text-decoration: none;
+  transition: all 0.2s;
+}
+
+.partner-btn.primary {
+  background: var(--ink);
+  color: var(--paper);
+  border: 1px solid var(--ink);
+}
+
+.partner-btn.primary:hover {
+  background: var(--navy);
+}
+
+.partner-btn.ghost {
+  background: transparent;
+  color: var(--ink);
+  border: 1px solid var(--ink);
+}
+
+.partner-btn.ghost:hover {
+  background: var(--ink);
+  color: var(--paper);
+}
+
+.partner-emails {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 11px;
+  letter-spacing: 0.04em;
+  color: var(--ink-muted);
+}
+
+.partner-emails span { color: var(--teal-ink); }
+
+/* ─────────── FOOTER ─────────── */
+footer {
+  background: var(--paper);
+  border-top: 1px solid var(--rule);
+  padding: 48px;
+}
+
+.footer-inner {
+  max-width: 1400px;
+  margin: 0 auto;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 32px;
+  flex-wrap: wrap;
+}
+
+.footer-brand {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.footer-brand-name {
+  font-family: 'Fraunces', serif;
+  font-weight: 600;
+  font-size: 16px;
+  letter-spacing: -0.02em;
+  color: var(--ink);
+  font-variation-settings: "opsz" 72;
+}
+
+.footer-tag {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 10px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--ink-muted);
+}
+
+.footer-links {
+  display: flex;
+  gap: 32px;
+}
+
+.footer-links a {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 11px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--ink-soft);
+  text-decoration: none;
+  transition: color 0.2s;
+}
+
+.footer-links a:hover { color: var(--ink); }
+
+/* ─────────── ANIMATIONS ─────────── */
+@keyframes rise {
+  from { opacity: 0; transform: translateY(20px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+.reveal {
+  opacity: 0;
+  transform: translateY(28px);
+  transition: opacity 0.9s cubic-bezier(0.22,1,0.36,1), transform 0.9s cubic-bezier(0.22,1,0.36,1);
+}
+
+.reveal.visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* ─────────── RESPONSIVE ─────────── */
+@media (max-width: 900px) {
+  header { padding: 20px 24px; }
+  header.scrolled { padding: 14px 24px; }
+  .header-nav, .header-cta { display: none; }
+  .menu-toggle { display: flex; }
+  .mobile-drawer { display: flex; top: 62px; }
+  .corner-mark { display: none; }
+
+  .hero { padding: 130px 24px 80px; }
+  .hero-eyebrow { margin-bottom: 36px; }
+  .eb-line { flex: 0 0 28px; }
+
+  .hero-foot { grid-template-columns: 1fr; gap: 32px; }
+
+  .problem { padding: 90px 24px; }
+  .problem-grid { grid-template-columns: 1fr; gap: 56px; }
+  .pstat-val { font-size: 42px; }
+
+  .solution { padding: 90px 24px; }
+  .solution-meta { grid-template-columns: 1fr; gap: 24px; margin-bottom: 56px; }
+  .use-cases { grid-template-columns: 1fr; }
+
+  .afcfta { padding: 90px 24px; }
+  .afcfta-inner { grid-template-columns: 1fr; gap: 48px; }
+
+  .rollout { padding: 90px 24px; }
+  .rollout-head { grid-template-columns: 1fr; gap: 24px; margin-bottom: 56px; }
+  .phases { grid-template-columns: 1fr; gap: 40px; }
+  .phases::before { display: none; }
+  .phase { padding-right: 0; }
+
+  .outcomes { padding: 90px 24px; }
+  .outcomes-grid { grid-template-columns: 1fr; }
+
+  .partner { padding: 90px 24px; }
+  .partner-actions { flex-direction: column; align-items: stretch; }
+
+  footer { padding: 32px 24px; }
+  .footer-inner { flex-direction: column; align-items: flex-start; gap: 20px; }
+  .footer-links { flex-wrap: wrap; gap: 18px; }
+}
+
+@media (min-width: 901px) and (max-width: 1200px) {
+  .hero { padding: 150px 32px 100px; }
+  .problem { padding: 120px 32px; }
+  .problem-grid { gap: 64px; }
+  .solution, .rollout, .outcomes, .afcfta { padding: 120px 32px; }
+  .solution-meta, .rollout-head { grid-template-columns: 200px 1fr; gap: 60px; }
+  .afcfta-inner { gap: 56px; }
+  .partner { padding: 130px 32px 110px; }
+  header { padding: 24px 32px; }
+}
+</style>
+</head>
+<body>
+
+<!-- HEADER -->
+<header id="header">
+  <a class="brand" href="index.html">
+    <div class="brand-mark">
+      <svg viewBox="0 0 30 30" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <path d="M9 3 L9 27 Q25 27 25 15 Q25 3 9 3" stroke="currentColor" stroke-width="1.6" fill="none" stroke-linecap="round"/>
+        <path d="M9 7 L9 23 Q21 23 21 15 Q21 7 9 7" stroke="currentColor" stroke-width="1.4" fill="none" stroke-linecap="round" opacity="0.7"/>
+        <path d="M9 11 L9 19 Q17 19 17 15 Q17 11 9 11" stroke="currentColor" stroke-width="1.2" fill="none" stroke-linecap="round" opacity="0.5"/>
+        <path d="M9 14 L9 16 Q14 16 14 15 Q14 14 9 14" stroke="currentColor" stroke-width="1" fill="none" stroke-linecap="round" opacity="0.35"/>
+      </svg>
+    </div>
+    <div class="brand-name">DRIS</div>
+    <div class="brand-sub">For Governments</div>
+  </a>
+
+  <nav class="header-nav">
+    <a href="index.html">Overview</a>
+    <a href="#problem">Problem</a>
+    <a href="#rollout">Rollout</a>
+    <a href="#partner" class="active">Partnership</a>
+  </nav>
+
+  <a href="#partner" class="header-cta">
+    Become a partner
+    <svg width="12" height="12" viewBox="0 0 12 12" fill="none">
+      <path d="M2 6h8M7 3l3 3-3 3" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/>
+    </svg>
+  </a>
+
+  <button class="menu-toggle" id="menuToggle" aria-label="Menu">
+    <span></span><span></span><span></span>
+  </button>
+</header>
+
+<div class="mobile-drawer" id="drawer">
+  <a href="index.html" onclick="closeDrawer()">Overview</a>
+  <a href="#problem" onclick="closeDrawer()">Problem</a>
+  <a href="#rollout" onclick="closeDrawer()">Rollout</a>
+  <a href="#partner" onclick="closeDrawer()">Partnership</a>
+</div>
+
+<!-- HERO -->
+<section class="hero">
+  <div class="hero-grid"></div>
+  <div class="corner-mark tr">DRIS / Public Sector — 01</div>
+
+  <div class="hero-inner">
+    <div class="hero-eyebrow">
+      <div class="eb-line"></div>
+      <div class="eb-text">
+        <strong>For sub-sovereign governments</strong> · Built for AfCFTA
+      </div>
+    </div>
+
+    <h1 class="hero-headline">
+      Digital public infrastructure for <em>African records, identity, and assets.</em>
+    </h1>
+
+    <div class="hero-foot">
+      <p class="hero-lead">
+        DRIS gives states, counties, ministries, and investment promotion agencies a <strong>secure, blockchain-anchored system</strong> for issuing, verifying, and protecting public records — land titles, business registries, archives, concessions, and credentials.
+      </p>
+      <div class="hero-actions">
+        <a href="#partner" class="hero-btn">
+          Request a partnership
+          <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
+            <path d="M2 7h10M7 3l4 4-4 4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+        </a>
+        <a href="#problem" class="hero-btn ghost">
+          Why this matters
+          <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
+            <path d="M7 2v10M3 8l4 4 4-4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+        </a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- PROBLEM (dark) -->
+<section class="problem" id="problem">
+  <div class="problem-inner">
+
+    <div class="problem-meta">
+      <span>§ 02 — The hidden cost of paper records</span>
+      <span>Sub-Saharan Africa</span>
+    </div>
+
+    <div class="problem-grid">
+      <div class="problem-text">
+        <h2>
+          Africa's public records are <em>fragmented</em>, fragile, and <em>impossible to verify across borders.</em>
+        </h2>
+        <p>
+          A land deed in one county cannot be quickly verified in another. A diploma issued in Lagos takes weeks to confirm in Accra. A business registry in one state is invisible to investors in the next. Every transaction — land, trade, finance, identity — is slowed and weakened by <strong>records no one can independently trust.</strong>
+        </p>
+        <p>
+          The cost is invisible but enormous. <strong>Investors hesitate.</strong> Disputes drag for years. Land ownership is contested, archives crumble, and AfCFTA's promise of free trade is throttled by document friction at every border.
+        </p>
+      </div>
+
+      <div class="problem-stats">
+        <div class="pstat reveal">
+          <div class="pstat-val">90<em>%</em></div>
+          <div class="pstat-desc">
+            of land in sub-Saharan Africa is undocumented or held without formal title.
+            <span class="pstat-source">World Bank · Land Governance Assessment</span>
+          </div>
+        </div>
+        <div class="pstat reveal">
+          <div class="pstat-val">$25<em>B+</em></div>
+          <div class="pstat-desc">
+            estimated annual losses across African economies from document fraud and disputed records.
+            <span class="pstat-source">UNECA Report on Illicit Financial Flows</span>
+          </div>
+        </div>
+        <div class="pstat reveal">
+          <div class="pstat-val">6–18<em>mo</em></div>
+          <div class="pstat-desc">
+            average time to verify cross-border business registrations and credentials within AfCFTA.
+            <span class="pstat-source">African Continental Free Trade Area Secretariat</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- SOLUTION / USE CASES -->
+<section class="solution">
+  <div class="solution-inner">
+    <div class="solution-meta">
+      <div class="solution-label reveal">§ 03 — What DRIS Enables</div>
+      <h2 class="solution-headline reveal">
+        One platform. Every public record. <em>Verifiable forever.</em>
+      </h2>
+    </div>
+
+    <div class="use-cases">
+      <div class="uc reveal">
+        <div class="uc-num">// 01</div>
+        <h3 class="uc-title"><em>Land &amp; property</em> registries</h3>
+        <p class="uc-desc">
+          Anchor every deed, title, and ownership transfer on-chain. Eliminate disputed claims, double-titling, and clerical fraud — the most common source of land-related litigation in Africa.
+        </p>
+        <div class="uc-tags">
+          <span class="uc-tag">Cadastres</span>
+          <span class="uc-tag">Title deeds</span>
+          <span class="uc-tag">Ownership transfers</span>
+        </div>
+      </div>
+
+      <div class="uc reveal">
+        <div class="uc-num">// 02</div>
+        <h3 class="uc-title"><em>Business &amp; investor</em> records</h3>
+        <p class="uc-desc">
+          Make business registries, licenses, and corporate filings instantly verifiable to investors, banks, and partners across borders. Faster due diligence, fewer KYC delays.
+        </p>
+        <div class="uc-tags">
+          <span class="uc-tag">Business registry</span>
+          <span class="uc-tag">Permits</span>
+          <span class="uc-tag">Tax certificates</span>
+        </div>
+      </div>
+
+      <div class="uc reveal">
+        <div class="uc-num">// 03</div>
+        <h3 class="uc-title"><em>Concessions &amp;</em> public assets</h3>
+        <p class="uc-desc">
+          Mining permits, agricultural concessions, port leases, and PPP contracts — anchored, traceable, and visible to investors. A clean public record of every asset and obligation.
+        </p>
+        <div class="uc-tags">
+          <span class="uc-tag">Mining</span>
+          <span class="uc-tag">Agriculture</span>
+          <span class="uc-tag">Infrastructure</span>
+        </div>
+      </div>
+
+      <div class="uc reveal">
+        <div class="uc-num">// 04</div>
+        <h3 class="uc-title"><em>Archives &amp;</em> historical documents</h3>
+        <p class="uc-desc">
+          Digitize national archives, government correspondence, and historical records. Preserve forever against fire, flood, and decay — accessible to citizens, researchers, and the diaspora.
+        </p>
+        <div class="uc-tags">
+          <span class="uc-tag">National archives</span>
+          <span class="uc-tag">Public records</span>
+          <span class="uc-tag">Historical</span>
+        </div>
+      </div>
+
+      <div class="uc reveal">
+        <div class="uc-num">// 05</div>
+        <h3 class="uc-title"><em>Education &amp;</em> professional credentials</h3>
+        <p class="uc-desc">
+          Diplomas, transcripts, and licenses issued by universities, ministries, and professional bodies. Verifiable in seconds — by employers, foreign embassies, and licensing authorities.
+        </p>
+        <div class="uc-tags">
+          <span class="uc-tag">Diplomas</span>
+          <span class="uc-tag">Licenses</span>
+          <span class="uc-tag">Certifications</span>
+        </div>
+      </div>
+
+      <div class="uc reveal">
+        <div class="uc-num">// 06</div>
+        <h3 class="uc-title"><em>Trade &amp; AfCFTA</em> documentation</h3>
+        <p class="uc-desc">
+          Certificates of origin, customs documentation, sanitary and phytosanitary certificates. The trust layer for African free trade — verifiable instantly across all 54 member states.
+        </p>
+        <div class="uc-tags">
+          <span class="uc-tag">Customs</span>
+          <span class="uc-tag">Origin certificates</span>
+          <span class="uc-tag">Cross-border</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- AFCFTA -->
+<section class="afcfta">
+  <div class="afcfta-inner">
+    <div class="afcfta-text">
+      <div class="eyebrow">The AfCFTA Connection</div>
+      <h2>
+        A continent-wide <em>trust layer</em> for African trade.
+      </h2>
+      <p>
+        AfCFTA promises the largest free trade area in the world by participating countries. But trade depends on <strong>trust</strong> — and trust depends on documents. Today, every customs check, business verification, and cross-border due diligence still relies on paper, fax, and phone calls.
+      </p>
+      <p>
+        DRIS provides the <strong>verification layer that makes AfCFTA actually workable.</strong> A Nigerian investor can verify a Ghanaian land title in seconds. A Kenyan customs officer can confirm an Ivorian certificate of origin instantly. A South African bank can validate a Senegalese business registration without leaving its desk.
+      </p>
+      <p>
+        <strong>One trust infrastructure. 54 member states. Every public record verifiable across borders.</strong>
+      </p>
+    </div>
+
+    <div class="map-illus">
+      <div class="map-corner tl">// Trust network</div>
+      <div class="map-corner br">54 states · live</div>
+
+      <svg class="map-svg" viewBox="0 0 400 420" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <!-- Stylized continent shape -->
+        <path d="M170 50 Q195 45 220 55 L235 75 Q245 90 240 110 L235 135 Q245 150 250 175 L260 200 Q280 210 285 230 L290 260 Q280 290 270 320 L260 350 Q240 375 215 380 L185 385 Q155 380 140 360 L125 335 Q115 305 120 275 L130 245 Q125 220 115 195 L110 165 Q120 130 140 100 L155 75 Q160 60 170 50 Z"
+              stroke="rgba(11,21,56,0.2)" stroke-width="1" fill="rgba(11,21,56,0.02)"/>
+
+        <!-- Connection lines -->
+        <line class="flow-path" x1="180" y1="120" x2="240" y2="170" stroke="#0B7A60" stroke-width="1"/>
+        <line class="flow-path" x1="240" y1="170" x2="200" y2="240" stroke="#0B7A60" stroke-width="1" style="animation-delay: 0.5s;"/>
+        <line class="flow-path" x1="200" y1="240" x2="160" y2="320" stroke="#0B7A60" stroke-width="1" style="animation-delay: 1s;"/>
+        <line class="flow-path" x1="160" y1="320" x2="240" y2="340" stroke="#0B7A60" stroke-width="1" style="animation-delay: 1.5s;"/>
+        <line class="flow-path" x1="240" y1="340" x2="180" y2="120" stroke="#0B7A60" stroke-width="1" style="animation-delay: 2s;"/>
+
+        <!-- Nodes -->
+        <circle class="node-pulse" cx="180" cy="120" r="3.5" fill="#1DC9A4"/>
+        <circle class="node-pulse" cx="240" cy="170" r="3.5" fill="#1DC9A4" style="animation-delay: 0.3s;"/>
+        <circle class="node-pulse" cx="200" cy="240" r="3.5" fill="#1DC9A4" style="animation-delay: 0.6s;"/>
+        <circle class="node-pulse" cx="160" cy="320" r="3.5" fill="#1DC9A4" style="animation-delay: 0.9s;"/>
+        <circle class="node-pulse" cx="240" cy="340" r="3.5" fill="#1DC9A4" style="animation-delay: 1.2s;"/>
+        <circle class="node-pulse" cx="155" cy="180" r="3.5" fill="#1DC9A4" style="animation-delay: 1.5s;"/>
+        <circle class="node-pulse" cx="225" cy="280" r="3.5" fill="#1DC9A4" style="animation-delay: 1.8s;"/>
+        <circle class="node-pulse" cx="195" cy="80" r="3.5" fill="#1DC9A4" style="animation-delay: 2.1s;"/>
+
+        <!-- City labels -->
+        <text x="155" y="105" font-family="IBM Plex Mono" font-size="9" fill="#7C8299" letter-spacing="1">Lagos</text>
+        <text x="250" y="170" font-family="IBM Plex Mono" font-size="9" fill="#7C8299" letter-spacing="1">Addis</text>
+        <text x="160" y="240" font-family="IBM Plex Mono" font-size="9" fill="#7C8299" letter-spacing="1">Kinshasa</text>
+        <text x="115" y="325" font-family="IBM Plex Mono" font-size="9" fill="#7C8299" letter-spacing="1">Cape Town</text>
+        <text x="248" y="345" font-family="IBM Plex Mono" font-size="9" fill="#7C8299" letter-spacing="1">Maputo</text>
+
+        <!-- Center label -->
+        <text x="200" y="210" font-family="Fraunces" font-style="italic" font-size="13" fill="#0B7A60" text-anchor="middle">Trust mesh</text>
+      </svg>
+    </div>
+  </div>
+</section>
+
+<!-- ROLLOUT -->
+<section class="rollout" id="rollout">
+  <div class="rollout-inner">
+    <div class="rollout-head">
+      <div class="rollout-label reveal">§ 05 — Phased Rollout</div>
+      <h2 class="rollout-headline reveal">
+        From pilot to <em>nationwide deployment</em> — with no upfront cost.
+      </h2>
+    </div>
+
+    <div class="phases">
+      <div class="phase first reveal">
+        <div class="phase-num">i</div>
+        <div class="phase-meta">Phase 01 — Pilot</div>
+        <div class="phase-title">Proof of concept</div>
+        <p class="phase-desc">
+          1–2 record volumes selected with the partner agency. DRIS pre-finances setup, software, and training. Zero cost to the institution.
+        </p>
+        <div class="phase-time">3–4 months · post-MOU</div>
+      </div>
+
+      <div class="phase reveal">
+        <div class="phase-num">ii</div>
+        <div class="phase-meta">Phase 02 — Digitization</div>
+        <div class="phase-title">Full archive migration</div>
+        <p class="phase-desc">
+          Bulk digitization of historical records with on-site staff training. Existing records anchored to chain alongside new issuances.
+        </p>
+        <div class="phase-time">6–12 months</div>
+      </div>
+
+      <div class="phase reveal">
+        <div class="phase-num">iii</div>
+        <div class="phase-meta">Phase 03 — Public access</div>
+        <div class="phase-title">Citizen verification</div>
+        <p class="phase-desc">
+          Public verification portal goes live. Citizens, businesses, and diaspora can search, request, and verify documents online.
+        </p>
+        <div class="phase-time">2–3 months · concurrent</div>
+      </div>
+
+      <div class="phase reveal">
+        <div class="phase-num">iv</div>
+        <div class="phase-meta">Phase 04 — USSD layer</div>
+        <div class="phase-title">Universal access</div>
+        <p class="phase-desc">
+          USSD short-code service launched for low-end phones and rural users. No smartphone, no internet, no problem — verification via simple dial codes.
+        </p>
+        <div class="phase-time">2–3 months</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- OUTCOMES -->
+<section class="outcomes">
+  <div class="outcomes-inner">
+    <div class="outcomes-head">
+      <div class="eyebrow">§ 06 — Outcomes</div>
+      <h2>
+        Measurable returns for governments and <em>their citizens.</em>
+      </h2>
+    </div>
+
+    <div class="outcomes-grid">
+      <div class="outcome reveal">
+        <div class="outcome-icon">
+          <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5">
+            <path d="M3 17V8L10 3L17 8V17" stroke-linejoin="round"/>
+            <path d="M7 17V12H13V17" stroke-linejoin="round"/>
+            <circle cx="10" cy="10" r="1" fill="currentColor"/>
+          </svg>
+        </div>
+        <div class="outcome-num">3<em>×</em> revenue</div>
+        <div class="outcome-title">For records institutions</div>
+        <div class="outcome-desc">DRIS Credits create a sustainable, transparent revenue stream from document services — with no leakage and full auditability.</div>
+      </div>
+
+      <div class="outcome reveal">
+        <div class="outcome-icon">
+          <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5">
+            <circle cx="7" cy="8" r="3"/>
+            <circle cx="14" cy="8" r="3"/>
+            <path d="M2 17c0-2.5 2.2-4.5 5-4.5s5 2 5 4.5M11 17c0-2.5 2.2-4.5 5-4.5s2.5 1 2.5 1"/>
+          </svg>
+        </div>
+        <div class="outcome-num">200<em>+ jobs</em></div>
+        <div class="outcome-title">Created per pilot</div>
+        <div class="outcome-desc">Local digitization, scanning, training, and support roles — directly creating youth employment in partner jurisdictions.</div>
+      </div>
+
+      <div class="outcome reveal">
+        <div class="outcome-icon">
+          <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5">
+            <path d="M10 2 L17 5 V11 C17 14 13.5 17 10 18 C6.5 17 3 14 3 11 V5 L10 2 Z" stroke-linejoin="round"/>
+            <path d="M7 10 L9 12 L13 8" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+        </div>
+        <div class="outcome-num">100<em>%</em> tamper-proof</div>
+        <div class="outcome-title">Anti-corruption ready</div>
+        <div class="outcome-desc">Every record action — issuance, edit, transfer — is logged immutably. Investigators and auditors get a clean, complete trail.</div>
+      </div>
+
+      <div class="outcome reveal">
+        <div class="outcome-icon">
+          <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5">
+            <circle cx="10" cy="10" r="8"/>
+            <path d="M2 10h16M10 2c2.5 2.5 3.5 5 3.5 8s-1 5.5-3.5 8M10 2c-2.5 2.5-3.5 5-3.5 8s1 5.5 3.5 8"/>
+          </svg>
+        </div>
+        <div class="outcome-num">54<em> states</em></div>
+        <div class="outcome-title">AfCFTA-ready by design</div>
+        <div class="outcome-desc">Records issued on DRIS in one country are verifiable across all participating AfCFTA states — no integration required.</div>
+      </div>
+
+      <div class="outcome reveal">
+        <div class="outcome-icon">
+          <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5">
+            <path d="M16 4l-2 4M4 4l2 4M16 16l-2-4M4 16l2-4" stroke-linecap="round"/>
+            <circle cx="10" cy="10" r="4"/>
+          </svg>
+        </div>
+        <div class="outcome-num">&lt; 1<em>s</em></div>
+        <div class="outcome-title">Verification time</div>
+        <div class="outcome-desc">From weeks of paper-based verification to under one second. Investors, employers, and partners get instant answers.</div>
+      </div>
+
+      <div class="outcome reveal">
+        <div class="outcome-icon">
+          <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5">
+            <path d="M3 6h14M3 10h14M3 14h10" stroke-linecap="round"/>
+            <circle cx="16" cy="14" r="2"/>
+          </svg>
+        </div>
+        <div class="outcome-num">∞<em> records</em></div>
+        <div class="outcome-title">Preserved forever</div>
+        <div class="outcome-desc">No fire, flood, or decay can erase records anchored on DRIS. Sovereign archives become permanent and globally accessible.</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- PARTNERSHIP CTA -->
+<section class="partner" id="partner">
+  <div class="partner-inner">
+    <div class="partner-eyebrow">Partnership Inquiry</div>
+    <h2 class="partner-h2">
+      Build the trust layer for <em>your jurisdiction.</em>
+    </h2>
+    <p class="partner-p">
+      DRIS works with state governments, county administrations, ministries, investment promotion agencies, and development finance institutions. Pilot programs start with no upfront cost.
+    </p>
+    <div class="partner-actions">
+      <a href="mailto:partnerships@dris.cc" class="partner-btn primary">
+        Request a partnership
+        <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
+          <path d="M2 7h10M7 3l4 4-4 4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+      </a>
+      <a href="mailto:dfi@dris.cc" class="partner-btn ghost">
+        For development partners
+      </a>
+    </div>
+    <div class="partner-emails">
+      <span>Sub-sovereign partnerships:</span> partnerships@dris.cc &nbsp; · &nbsp;
+      <span>DFIs &amp; multilaterals:</span> dfi@dris.cc
+    </div>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer>
+  <div class="footer-inner">
+    <div class="footer-brand">
+      <div class="brand-mark" style="width:24px; height:24px;">
+        <svg viewBox="0 0 30 30" fill="none" xmlns="http://www.w3.org/2000/svg" style="width:24px;height:24px;">
+          <path d="M9 3 L9 27 Q25 27 25 15 Q25 3 9 3" stroke="currentColor" stroke-width="1.6" fill="none" stroke-linecap="round"/>
+          <path d="M9 7 L9 23 Q21 23 21 15 Q21 7 9 7" stroke="currentColor" stroke-width="1.4" fill="none" stroke-linecap="round" opacity="0.7"/>
+          <path d="M9 11 L9 19 Q17 19 17 15 Q17 11 9 11" stroke="currentColor" stroke-width="1.2" fill="none" stroke-linecap="round" opacity="0.5"/>
+        </svg>
+      </div>
+      <div class="footer-brand-name">DRIS</div>
+      <div class="footer-tag">· Public sector · Built for Africa</div>
+    </div>
+    <div class="footer-links">
+      <a href="index.html">Overview</a>
+      <a href="#partner">Partnership</a>
+      <a href="mailto:partnerships@dris.cc">Contact</a>
+    </div>
+  </div>
+</footer>
+
+<script>
+  const header = document.getElementById('header');
+  window.addEventListener('scroll', () => header.classList.toggle('scrolled', scrollY > 20));
+
+  const toggle = document.getElementById('menuToggle');
+  const drawer = document.getElementById('drawer');
+  toggle.addEventListener('click', () => {
+    const open = drawer.classList.toggle('open');
+    toggle.classList.toggle('open', open);
+  });
+  function closeDrawer() {
+    drawer.classList.remove('open');
+    toggle.classList.remove('open');
+  }
+
+  const io = new IntersectionObserver(entries => {
+    entries.forEach(e => {
+      if (e.isIntersecting) {
+        setTimeout(() => e.target.classList.add('visible'), e.target.dataset.delay || 0);
+      }
+    });
+  }, { threshold: 0.1, rootMargin: '0px 0px -40px 0px' });
+
+  document.querySelectorAll('.reveal').forEach(el => io.observe(el));
+
+  document.querySelectorAll('.uc, .phase, .outcome, .pstat').forEach((el, i) => {
+    el.dataset.delay = (i % 4) * 80;
+  });
+</script>
+</body>
+</html>
